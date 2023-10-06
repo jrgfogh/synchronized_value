@@ -3,7 +3,7 @@
 #
 
 # Add source to this project's executable.
-add_executable (synchronized_value "synchronized_value.cpp" "synchronized_value.h")
+add_executable (synchronized_value "synchronized_value_tests.cpp" "synchronized_value.h")
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET synchronized_value PROPERTY CXX_STANDARD 20)
