@@ -57,6 +57,24 @@ public:
 		return update_guard{*this};
 	}
 
-	// TODO(jrgfogh): Implement!
-	auto operator*();
+	auto operator*()
+	{
+		class value_locker
+		{
+			std::unique_lock<std::mutex> lock_;
+			GuardedType &guarded_data_;
+		public:
+			explicit value_locker(std::mutex& mutex, GuardedType &data) :
+				lock_{mutex},
+				guarded_data_{data}
+			{
+			}
+
+			explicit(false) operator GuardedType&()
+			{
+				return guarded_data_;
+			}
+		};
+		return value_locker{mutex_, guarded_data_};
+	}
 };
