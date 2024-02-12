@@ -1,8 +1,7 @@
-#include <map>
-
 #include "../synchronized_value/synchronized_value.h"
 
-#include <gtest/gtest.h>
+#include "gtest_unwarn.h"
+
 
 TEST(HelloTest, BasicAssertions) {
 	synchronized_value<std::map<int, int>> sv0;
