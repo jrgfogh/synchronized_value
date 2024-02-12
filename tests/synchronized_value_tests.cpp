@@ -1,9 +1,10 @@
 #include <map>
 
-#include "synchronized_value.h"
+#include "../synchronized_value/synchronized_value.h"
 
-int main()
-{
+#include <gtest/gtest.h>
+
+TEST(HelloTest, BasicAssertions) {
 	synchronized_value<std::map<int, int>> sv0;
 	sv0->emplace(0, 5);
 	{
@@ -16,6 +17,4 @@ int main()
 	{
 		auto [a, b, c] = tuple;
 	});
-
-	return 0;
 }
