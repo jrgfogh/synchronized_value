@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <sstream>
 #include <stdexcept>
 
 template <typename Element>
@@ -93,5 +94,31 @@ public:
 	[[nodiscard]] size_t size() const
 	{
 		return size_;
+	}
+
+	[[nodiscard]] std::string serialize_as_dot() const
+	{
+		std::ostringstream output;
+		output << "digraph {\n";
+		output << "    head[style=invis];\n";
+		output << "    tail[style=invis];\n";
+		for (int i = 0; auto const &element : *this)
+		{
+			output << "    node" << i << "[shape=box,label=\"" << element << "\"];\n";
+			++i;
+		}
+		output << "    head -> node0[label=\"  head\"];\n";
+		output << "    tail -> node" << size_ - 1 << "[label=\"  tail\"];\n";
+		for (size_t i = 0; i + 1 < size_; ++i)
+		{
+			output << "    node" << i << " -> node" << i + 1 << ";\n";
+			output << "    node" << i + 1 << " -> node" << i << ";\n";
+		}
+		output << "    { rank=same;";
+		for (size_t i = 0; i < size_; ++i)
+			output << " node" << i;
+		output << " }\n";
+		output << "}\n";
+		return output.str();
 	}
 };
