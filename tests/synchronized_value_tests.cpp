@@ -2,6 +2,9 @@
 
 #include "gtest_unwarn.h"
 
+static_assert(std::is_nothrow_move_assignable_v<update_guard<int>>);
+static_assert(std::is_nothrow_move_constructible_v<update_guard<int>>);
+static_assert(std::is_nothrow_swappable_v<update_guard<int>>);
 
 TEST(HelloTest, BasicAssertions) {
 	synchronized_value<std::map<int, int>> sv0;

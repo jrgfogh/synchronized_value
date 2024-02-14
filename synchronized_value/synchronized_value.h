@@ -9,22 +9,22 @@ template <typename GuardedType>
 class update_guard
 {
 	std::unique_lock<std::mutex> lock_;
-	GuardedType &guarded_data_;
+	GuardedType *guarded_data_;
 public:
 	explicit update_guard(synchronized_value<GuardedType>& sv) :
 		lock_{sv.mutex_},
-		guarded_data_{sv.guarded_data_}
+		guarded_data_{&sv.guarded_data_}
 	{
 	}
 
 	auto* operator->() noexcept
 	{
-		return &guarded_data_;
+		return guarded_data_;
 	}
 
 	auto& operator*() noexcept
 	{
-		return guarded_data_;
+		return *guarded_data_;
 	}
 };
 
