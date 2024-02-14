@@ -3,8 +3,7 @@
 #include "gtest_unwarn.h"
 
 TEST(doubly_linked_list, iterate_empty_list) {
-	doubly_linked_list<int> l;
-	for (int d : l) {}
+	for (const doubly_linked_list<int> l; int _ : l) {}
 }
 
 TEST(doubly_linked_list, insert_element_and_iterate) {
@@ -51,4 +50,21 @@ TEST(doubly_linked_list, insert_five_elements_out_of_order_and_iterate) {
 	for (int d : l)
 		output.emplace_back(d);
 	EXPECT_EQ(output, (std::vector{2, 1, 4, 5, 3}));
+}
+
+TEST(doubly_linked_list, insert_and_erase_elements) {
+	doubly_linked_list<double> l;
+	l.insert(l.end(), 1.);
+	doubly_linked_list<double>::iterator next = l.insert(l.end(), 2.);
+	l.insert(l.end(), 3.);
+	next = l.erase(next);
+	EXPECT_EQ(l.size(), 2);
+	EXPECT_EQ(*next, 3.);
+	next = l.erase(l.begin());
+	EXPECT_EQ(l.size(), 1);
+	EXPECT_EQ(*next, 3.);
+	next = l.erase(l.begin());
+	EXPECT_EQ(l.size(), 0);
+	EXPECT_EQ(next, l.end());
+	l.insert(l.end(), 5.);
 }

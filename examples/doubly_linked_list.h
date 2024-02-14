@@ -13,12 +13,13 @@ class doubly_linked_list
 		std::unique_ptr<node_t> next;
 		node_t *prev;
 	};
-
+public:
 	class iterator
 	{
 		friend class doubly_linked_list;
 		node_t *node_;
 	public:
+		iterator() noexcept = default;
 		explicit iterator(node_t* node)
 			: node_(node)
 		{
@@ -39,6 +40,7 @@ class doubly_linked_list
 		}
 	};
 
+private:
 	// INVARIANT: !!head_ == !!tail_.
 	std::unique_ptr<node_t> head_;
 	node_t * tail_ = nullptr;
@@ -66,6 +68,18 @@ class doubly_linked_list
 		tail_->next = std::make_unique<node_t>(value, nullptr, tail_);
 		tail_ = tail_->next.get();
 		return iterator{tail_};
+	}
+
+	iterator erase_head()
+	{
+		head_ = std::move(head_->next);
+		if (head_)
+			head_->prev = nullptr;
+		else
+			// This isn't strictly needed, since we never read tail_ in insert_empty().
+			// I assign it anyway, to maintain the invariant.
+			tail_ = nullptr;
+		return iterator{head_.get()};
 	}
 public:
 	iterator insert(iterator pos, Element const &value)
@@ -120,5 +134,19 @@ public:
 		output << " }\n";
 		output << "}\n";
 		return output.str();
+	}
+
+	iterator erase(iterator where)
+	{
+		--size_;
+		if (head_.get() == where.node_)
+			return erase_head();
+		node_t *prev = where.node_->prev;
+		if (where.node_ == tail_)
+			tail_ = prev;
+		prev->next = std::move(prev->next->next);
+		if (prev->next)
+			prev->next->prev = prev;
+		return iterator{prev->next.get()};
 	}
 };
