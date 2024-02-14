@@ -1,6 +1,4 @@
-﻿enable_testing()
-
-add_executable(
+﻿add_executable(
   synchronized_value_tests
   synchronized_value_tests.cpp
   doubly_linked_list_tests.cpp)
