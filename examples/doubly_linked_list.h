@@ -174,7 +174,6 @@ public:
 		prev->next = std::move(prev->next->next);
 		if (prev->next)
 			prev->next->prev = prev;
-		if (!check_invariants()) throw std::logic_error{"Fool!"};
 		return iterator{prev->next.get()};
 	}
 };
