@@ -1,5 +1,6 @@
 #pragma once
 
+#include <map>
 #include <memory>
 #include <sstream>
 #include <stdexcept>
@@ -10,6 +11,7 @@ class doubly_linked_list
 	struct node_t
 	{
 		Element value;
+		// INVARIANT: !next || next->prev == this
 		std::unique_ptr<node_t> next;
 		node_t *prev;
 	};
@@ -41,11 +43,10 @@ public:
 	};
 
 private:
-	// INVARIANT: !!head_ == !!tail_.
+	// INVARIANT: !!head_ == !!tail_
+	// INVARIANT: !head_ || !head_->prev
 	std::unique_ptr<node_t> head_;
-	node_t * tail_ = nullptr;
-	// INVARIANT: The list contains exactly size_ nodes.
-	size_t size_ = 0;
+	node_t *tail_ = nullptr;
 
 	iterator insert_empty(Element const &value)
 	{
@@ -81,10 +82,20 @@ private:
 			tail_ = nullptr;
 		return iterator{head_.get()};
 	}
+
+	[[nodiscard]] bool check_prev_next_invariant() const
+	{
+		for (auto it = begin(); it != end(); ++it)
+		{
+			auto *next = it.node_->next.get();
+			if (next && next->prev != it.node_)
+				return false;
+		}
+		return true;
+	}
 public:
 	iterator insert(iterator pos, Element const &value)
 	{
-		++size_;
 		if (!pos.node_)
 			return insert_tail(value);
 		if (!pos.node_->prev)
@@ -105,9 +116,11 @@ public:
 		return iterator{nullptr};
 	}
 
-	[[nodiscard]] size_t size() const
+	[[nodiscard]] bool check_invariants() const
 	{
-		return size_;
+		return !!head_ == !!tail_ &&
+			(!head_ || !head_->prev) &&
+			check_prev_next_invariant();
 	}
 
 	[[nodiscard]] std::string serialize_as_dot() const
@@ -116,20 +129,29 @@ public:
 		output << "digraph {\n";
 		output << "    head[style=invis];\n";
 		output << "    tail[style=invis];\n";
-		for (int i = 0; auto const &element : *this)
+		std::map<void*, int> node_indices;
+		// We can't use range-based for, since we want to be able to print broken lists:
+		auto i = 0;
+		for (auto it = begin(); it != end(); ++it)
 		{
-			output << "    node" << i << "[shape=box,label=\"" << element << "\"];\n";
+			node_indices[it.node_] = i;
+			output << "    node" << i << "[shape=box,label=\"" << *it << "\"];\n";
 			++i;
 		}
-		output << "    head -> node0[label=\"  head\"];\n";
-		output << "    tail -> node" << size_ - 1 << "[label=\"  tail\"];\n";
-		for (size_t i = 0; i + 1 < size_; ++i)
+		auto const size = node_indices.size();
+		output << "    head -> node" << node_indices[head_.get()] << "[label=\"  head\"];\n";
+		output << "    tail -> node" << node_indices[tail_] << "[label=\"  tail\"];\n";
+		for (auto it = begin(); it != end(); ++it)
 		{
-			output << "    node" << i << " -> node" << i + 1 << ";\n";
-			output << "    node" << i + 1 << " -> node" << i << ";\n";
+			if (it.node_->next)
+				output << "    node" << node_indices[it.node_] << " -> node" <<
+					node_indices[it.node_->next.get()] << ";\n";
+			if (it.node_->prev)
+				output << "    node" << node_indices[it.node_] << " -> node" <<
+					node_indices[it.node_->prev] << ";\n";
 		}
 		output << "    { rank=same;";
-		for (size_t i = 0; i < size_; ++i)
+		for (size_t i = 0; i < size; ++i)
 			output << " node" << i;
 		output << " }\n";
 		output << "}\n";
@@ -138,7 +160,6 @@ public:
 
 	iterator erase(iterator where)
 	{
-		--size_;
 		if (head_.get() == where.node_)
 			return erase_head();
 		node_t *prev = where.node_->prev;
