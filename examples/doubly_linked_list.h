@@ -12,8 +12,17 @@ class doubly_linked_list
 	{
 		Element value;
 		// INVARIANT: !next || next->prev == this
+		// INVARIANT: next.get() != this
 		std::unique_ptr<node_t> next;
+		// INVARIANT: prev != this
 		node_t *prev;
+
+		[[nodiscard]] bool check_invariants() const
+		{
+			return (!next || next->prev == this) &&
+				next.get() != this &&
+				prev != this;
+		}
 	};
 public:
 	class iterator
@@ -83,14 +92,11 @@ private:
 		return iterator{head_.get()};
 	}
 
-	[[nodiscard]] bool check_prev_next_invariant() const
+	[[nodiscard]] bool check_node_invariants() const
 	{
 		for (auto it = begin(); it != end(); ++it)
-		{
-			auto *next = it.node_->next.get();
-			if (next && next->prev != it.node_)
+			if (!it.node_->check_invariants())
 				return false;
-		}
 		return true;
 	}
 public:
@@ -120,7 +126,7 @@ public:
 	{
 		return !!head_ == !!tail_ &&
 			(!head_ || !head_->prev) &&
-			check_prev_next_invariant();
+			check_node_invariants();
 	}
 
 	[[nodiscard]] std::string serialize_as_dot() const
@@ -168,6 +174,7 @@ public:
 		prev->next = std::move(prev->next->next);
 		if (prev->next)
 			prev->next->prev = prev;
+		if (!check_invariants()) throw std::logic_error{"Fool!"};
 		return iterator{prev->next.get()};
 	}
 };

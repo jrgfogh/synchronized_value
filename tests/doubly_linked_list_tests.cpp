@@ -3,9 +3,14 @@
 #include "gtest_unwarn.h"
 
 #include <algorithm>
+#include <execution>
+#include <future>
 #include <random>
 
-TEST(doubly_linked_list, iterate_empty_list) {
+#include "../synchronized_value/synchronized_value.h"
+
+TEST(doubly_linked_list, iterate_empty_list)
+{
 	for (const doubly_linked_list<int> l; int _ : l) {}
 }
 
@@ -82,4 +87,29 @@ TEST(doubly_linked_list, stress_test) {
 	for (auto const it : iterators)
 		l.erase(it);
 	EXPECT_TRUE(l.check_invariants());
+}
+
+TEST(doubly_linked_list, async) {
+	doubly_linked_list<int> l;
+	std::vector<doubly_linked_list<int>::iterator> iterators;
+	iterators.reserve(5000);
+	for (int i = 0; i < 5000; i++)
+		iterators.emplace_back(l.insert(l.end(), i));
+	EXPECT_TRUE(l.check_invariants());
+	std::mt19937 mt; // NOLINT(cert-msc51-cpp)
+	std::ranges::shuffle(iterators, mt);
+	std::vector<std::future<void>> futures;
+	futures.reserve(iterators.size());
+	synchronized_value<doubly_linked_list<int>> sync_l{std::move(l)};
+	for (auto const it : iterators)
+	{
+		futures.emplace_back(std::async([&sync_l, it]
+		{
+			update_guard guard{sync_l};
+			guard->erase(it);
+			EXPECT_TRUE(guard->check_invariants());
+		}));
+	}
+	for (auto &future : futures)
+		future.get();
 }

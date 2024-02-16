@@ -17,12 +17,12 @@ public:
 	{
 	}
 
-	auto* operator->() noexcept
+	GuardedType *operator->() noexcept
 	{
 		return guarded_data_;
 	}
 
-	auto& operator*() noexcept
+	GuardedType &operator*() noexcept
 	{
 		return *guarded_data_;
 	}
@@ -46,10 +46,10 @@ public:
 	}
 
 	template<typename F>
-	auto apply(F&& func)
+	auto apply(F const &func)
 	{
 		std::unique_lock lock{mutex_};
-		func(guarded_data_);
+		return func(guarded_data_);
 	}
 
 	auto operator->()
