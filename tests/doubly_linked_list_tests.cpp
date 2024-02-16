@@ -53,7 +53,6 @@ TEST(doubly_linked_list, insert_five_elements_out_of_order_and_iterate) {
 		output.emplace_back(d);
 	EXPECT_EQ(output, (std::vector{2, 1, 4, 5, 3}));
 	EXPECT_TRUE(l.check_invariants());
-	std::cout << l.serialize_as_dot() << std::endl;
 }
 
 TEST(doubly_linked_list, insert_and_erase_elements) {
