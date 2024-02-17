@@ -4,7 +4,7 @@
 
 This repo contains an example implementation of the current proposal.
 
-The current proposal is described in documents number N4033 and p0290r4.
+The current proposal is described in documents number [N4033](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n4033.html) and [p0290r4](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2023/p0290r4.html).
 
 [Slides from the lightning talk at CppCon '23](https://github.com/jrgfogh/synchronized_value/blob/main/Adding%20Thread%20Safety.pdf)
 
