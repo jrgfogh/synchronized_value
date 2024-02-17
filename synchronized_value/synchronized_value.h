@@ -74,6 +74,17 @@ public:
 			{
 				return guarded_data_;
 			}
+
+			explicit(false) operator GuardedType const &() const
+			{
+				return guarded_data_;
+			}
+
+			value_locker &operator=(GuardedType const &new_data)
+			{
+				guarded_data_ = new_data;
+				return *this;
+			}
 		};
 		return value_locker{mutex_, guarded_data_};
 	}

@@ -6,7 +6,14 @@ static_assert(std::is_nothrow_move_assignable_v<update_guard<int>>);
 static_assert(std::is_nothrow_move_constructible_v<update_guard<int>>);
 static_assert(std::is_nothrow_swappable_v<update_guard<int>>);
 
-TEST(HelloTest, BasicAssertions) {
+TEST(synchronized_value_tests, star_operator) {
+	synchronized_value<int> sv{5};
+	EXPECT_EQ(*sv, 5);
+	*sv = 2;
+	EXPECT_EQ(*sv, 2);
+}
+
+TEST(synchronized_value_tests, BasicAssertions) {
 	synchronized_value<std::map<int, int>> sv0;
 	sv0->emplace(0, 5);
 	{
