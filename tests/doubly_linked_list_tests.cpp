@@ -1,4 +1,5 @@
 #include "../examples/doubly_linked_list.h"
+#include "../examples/concurrent_doubly_linked_list.h"
 
 #include "gtest_unwarn.h"
 
@@ -11,10 +12,11 @@
 
 template <typename DoublyLinkedList>
 class doubly_linked_list_tests : public ::testing::Test {
-public:
 };
 
-using list_types = ::testing::Types<doubly_linked_list<int>>;
+using list_types = ::testing::Types<
+	example::doubly_linked_list<int>,
+	example::concurrent_doubly_linked_list<int>>;
 TYPED_TEST_SUITE(doubly_linked_list_tests, list_types);
 
 TYPED_TEST(doubly_linked_list_tests, iterate_empty_list)
@@ -98,8 +100,8 @@ TYPED_TEST(doubly_linked_list_tests, stress_test) {
 }
 
 TEST(doubly_linked_list_tests, async) {
-	doubly_linked_list<int> l;
-	std::vector<doubly_linked_list<int>::iterator> iterators;
+	example::doubly_linked_list<int> l;
+	std::vector<example::doubly_linked_list<int>::iterator> iterators;
 	iterators.reserve(5000);
 	for (int i = 0; i < 5000; i++)
 		iterators.emplace_back(l.insert(l.end(), i));
@@ -108,7 +110,7 @@ TEST(doubly_linked_list_tests, async) {
 	std::ranges::shuffle(iterators, mt);
 	std::vector<std::future<void>> futures;
 	futures.reserve(iterators.size());
-	synchronized_value<doubly_linked_list<int>> sync_l{std::move(l)};
+	synchronized_value<example::doubly_linked_list<int>> sync_l{std::move(l)};
 	for (auto const it : iterators)
 	{
 		futures.emplace_back(std::async([&sync_l, it]

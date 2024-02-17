@@ -8,7 +8,7 @@
 namespace example
 {
 	template <typename Element>
-	class doubly_linked_list
+	class concurrent_doubly_linked_list
 	{
 		struct node_t
 		{
@@ -29,7 +29,7 @@ namespace example
 	public:
 		class iterator
 		{
-			friend class doubly_linked_list;
+			friend class concurrent_doubly_linked_list;
 			node_t *node_;
 		public:
 			iterator() noexcept = default;
