@@ -19,7 +19,7 @@ namespace example
 			// INVARIANT: prev != this
 			node_t *prev;
 
-			[[nodiscard]] bool check_invariants() const
+			[[nodiscard]] auto check_invariants() const -> bool
 			{
 				return (!next || next->prev == this) &&
 					next.get() != this &&
@@ -38,15 +38,15 @@ namespace example
 			{
 			}
 
-			bool operator==(iterator const &other) const = default;
+			auto operator==(iterator const &other) const -> bool = default;
 
-			iterator const &operator++()
+			auto operator++() -> iterator const&
 			{
 				node_ = node_->next.get();
 				return *this;
 			}
 
-			Element operator*()
+			auto operator*() -> Element
 			{
 				if (!node_) throw std::runtime_error{"Tried to dereference an invalid iterator."};
 				return Element{node_->value};
@@ -59,21 +59,21 @@ namespace example
 		std::unique_ptr<node_t> head_;
 		node_t *tail_ = nullptr;
 
-		iterator insert_empty(Element const &value)
+		auto insert_empty(Element const &value) -> iterator
 		{
 			head_ = std::make_unique<node_t>(value);
 			tail_ = head_.get();
 			return iterator{head_.get()};
 		}
 
-		iterator insert_head(Element const &value)
+		auto insert_head(Element const &value) -> iterator
 		{
 			head_ = std::make_unique<node_t>(value, std::move(head_));
 			head_->next->prev = head_.get();
 			return iterator{head_.get()};
 		}
 
-		iterator insert_tail(Element const &value)
+		auto insert_tail(Element const &value) -> iterator
 		{
 			if (!head_)
 				return insert_empty(value);
@@ -82,7 +82,7 @@ namespace example
 			return iterator{tail_};
 		}
 
-		iterator erase_head()
+		auto erase_head() -> iterator
 		{
 			head_ = std::move(head_->next);
 			if (head_)
@@ -94,7 +94,7 @@ namespace example
 			return iterator{head_.get()};
 		}
 
-		[[nodiscard]] bool check_node_invariants() const
+		[[nodiscard]] auto check_node_invariants() const -> bool
 		{
 			for (auto it = begin(); it != end(); ++it)
 				if (!it.node_->check_invariants())
@@ -102,7 +102,7 @@ namespace example
 			return true;
 		}
 	public:
-		iterator insert(iterator pos, Element const &value)
+		auto insert(iterator pos, Element const &value) -> iterator
 		{
 			if (!pos.node_)
 				return insert_tail(value);
@@ -124,14 +124,14 @@ namespace example
 			return iterator{nullptr};
 		}
 
-		[[nodiscard]] bool check_invariants() const
+		[[nodiscard]] auto check_invariants() const -> bool
 		{
 			return !!head_ == !!tail_ &&
 				(!head_ || !head_->prev) &&
 				check_node_invariants();
 		}
 
-		[[nodiscard]] std::string serialize_as_dot() const
+		[[nodiscard]] auto serialize_as_dot() const -> std::string
 		{
 			std::ostringstream output;
 			output << "digraph {\n";
@@ -166,7 +166,7 @@ namespace example
 			return output.str();
 		}
 
-		iterator erase(iterator where)
+		auto erase(iterator where) -> iterator
 		{
 			if (head_.get() == where.node_)
 				return erase_head();

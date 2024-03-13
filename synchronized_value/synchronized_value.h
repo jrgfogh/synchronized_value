@@ -17,12 +17,12 @@ public:
 	{
 	}
 
-	GuardedType *operator->() noexcept
+	auto operator->() noexcept -> GuardedType*
 	{
 		return guarded_data_;
 	}
 
-	GuardedType &operator*() noexcept
+	auto operator*() noexcept -> GuardedType&
 	{
 		return *guarded_data_;
 	}
@@ -37,7 +37,7 @@ class synchronized_value
 	GuardedType guarded_data_;
 public:
 	synchronized_value(synchronized_value const&) = delete;
-	synchronized_value& operator=(synchronized_value const&) = delete;
+	auto operator=(synchronized_value const &) -> synchronized_value& = delete;
 
 	template<typename ... Args>
 	explicit synchronized_value(Args&& ... args) :
@@ -80,7 +80,7 @@ public:
 				return guarded_data_;
 			}
 
-			value_locker &operator=(GuardedType const &new_data)
+			auto operator=(GuardedType const &new_data) -> value_locker&
 			{
 				guarded_data_ = new_data;
 				return *this;
