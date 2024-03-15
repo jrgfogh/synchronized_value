@@ -19,6 +19,12 @@ The current proposal is described in documents number [N4033](https://www.open-s
 
 ## Related work:
 
+Ansel Sermersheim talked about a similar construct with some extra features at CppCon 2017. The relevant bits are in part 2.
+
+[CppCon 2017: Ansel Sermersheim “Multithreading is the answer. What is the question? (part 1 of 2)”](https://www.youtube.com/watch?v=GNw3RXr-VJk)
+
+[CppCon 2017: Ansel Sermersheim “Multithreading is the answer. What is the question? (part 2 of 2)”](https://www.youtube.com/watch?v=sDLQWivf1-I)
+
 [Boost's synchronized_value](https://www.boost.org/doc/libs/1_83_0/doc/html/thread/sds.html#thread.sds.synchronized_valuesxxx)
 
 [`Synchronized<T>` from folly](https://github.com/facebook/folly/blob/main/folly/docs/Synchronized.md)
