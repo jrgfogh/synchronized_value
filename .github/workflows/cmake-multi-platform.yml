@@ -54,8 +54,9 @@ jobs:
       run: |
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
 
-    - name: Setup Cpp
+    - name: Install Clang
       uses: aminya/setup-cpp@v1
+      if: matrix.c_compiler == 'clang'
       with:
         compiler: ${{ matrix.compiler }}
         vcvarsall: ${{ contains(matrix.os, 'windows') }}
