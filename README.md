@@ -12,7 +12,7 @@ The current proposal is described in documents number [N4033](https://www.open-s
 
 * Make update_guard movable/swappable, to facility hand-over-hand locking.
 * Support for alternative mutex types, e.g. `std::shared_mutex`, `std::timed_mutex`, etc.
-* Compatibility with `std::condition_variable` and `std::condition_variable_any`
+* Support for [conditional critical sections](https://abseil.io/docs/cpp/guides/synchronization#conditional-critical-sections)
 * Hierarchies of synchronized values, for working with arena allocators:
   
   To read, only lock the value in read mode. To write, lock both the value and the arena in write mode.
