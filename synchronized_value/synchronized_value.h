@@ -24,6 +24,9 @@ template <typename GuardedType> class synchronized_value {
   GuardedType guarded_data_;
 
 public:
+
+  using value_type = GuardedType;
+
   synchronized_value(synchronized_value const &) = delete;
   auto operator=(synchronized_value const &) -> synchronized_value & = delete;
 
