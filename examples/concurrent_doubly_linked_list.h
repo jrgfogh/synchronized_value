@@ -1,3 +1,5 @@
+/// TODO(jrgfogh): This file doesn't actually contain any synchronization yet.
+
 #pragma once
 
 #include <map>
