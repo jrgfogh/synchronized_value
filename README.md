@@ -10,6 +10,7 @@ The current proposal is described in documents number [N4033](https://www.open-s
 
 ## Ideas for extensions
 
+* Const should propagate, so `synchronized_value<T> const` is equivalent to `synchronized_value<T const>`.
 * Make update_guard movable/swappable, to facility hand-over-hand locking.
 * Support for alternative mutex types, e.g. `std::shared_mutex`, `std::timed_mutex`, etc.
 * Support for [conditional critical sections](https://abseil.io/docs/cpp/guides/synchronization#conditional-critical-sections)
