@@ -16,6 +16,8 @@ projects, I have decided to redesign the abstraction.
 ## Ideas for Extensions
 
 * Const should propagate, so `synchronized_value<T> const` is equivalent to `synchronized_value<T const>`.
+* Sharing a mutex between several update guards, analogously to how several `std::shared_ptr`s can share a count.
+  Use case: Locking head/tail in the `concurrent_doubly_linked_list` example. 
 * Make update_guard movable/swappable, to facility hand-over-hand locking.
 * Support for alternative mutex types, e.g. `std::shared_mutex`, `std::timed_mutex`, etc.
 * Support for [conditional critical sections](https://abseil.io/docs/cpp/guides/synchronization#conditional-critical-sections)
