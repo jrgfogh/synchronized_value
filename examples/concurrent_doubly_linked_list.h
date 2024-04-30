@@ -48,8 +48,8 @@ public:
 private:
   // INVARIANT: !!head_ == !!tail_
   // INVARIANT: !head_ || !head_->prev
-  mutable synchronized_value<std::unique_ptr<node_t>> head_;
-  mutable synchronized_value<node_t *> tail_;
+  mutable synchronized_value<std::unique_ptr<node_t>, std::recursive_mutex> head_;
+  mutable synchronized_value<node_t *, std::recursive_mutex> tail_;
 
   auto insert_empty(auto &headGuard, Element const &value) -> iterator {
     *headGuard = std::make_unique<node_t>(value);
@@ -110,8 +110,8 @@ public:
   [[nodiscard]] auto end() const -> iterator { return iterator{nullptr}; }
 
   [[nodiscard]] auto check_invariants() const -> bool {
-    update_guard<std::unique_ptr<node_t>> headGuard{head_};
-    update_guard<node_t *> tailGuard{tail_};
+    update_guard<std::unique_ptr<node_t>, std::recursive_mutex> headGuard{head_};
+    update_guard<node_t *, std::recursive_mutex> tailGuard{tail_};
     return !!*headGuard == !!*tailGuard && (!*headGuard || !(*headGuard)->prev) &&
            // NOTE(jrgfogh): This will deadlock!
            check_node_invariants();
