@@ -1,6 +1,7 @@
 #include "../synchronized_value/synchronized.h"
 
 #include <shared_mutex>
+#include <string>
 
 #include "gtest_unwarn.h"
 
@@ -27,7 +28,26 @@ static_assert(valid_specialization<int, std::mutex>);
 static_assert(valid_specialization<int, std::shared_mutex>);
 static_assert(valid_specialization<double, std::recursive_mutex>);
 
-TEST(synchronized_value_tests, BasicAssertions) {
+TEST(synchronized_tests, ConstructorForwardsMoveOnlyType) {
+  sv::synchronized<std::unique_ptr<int>> sv0{std::make_unique<int>(5)};
+  ASSERT_NE(sv0.wlock()->get(), nullptr);
+  ASSERT_EQ(*sv0.wlock()->get(), 5);
+}
+
+TEST(synchronized_tests, ConstructorForwardsCopyOnlyType) {
+  const std::shared_ptr<int> ptr = std::make_shared<int>(7);
+  sv::synchronized<std::shared_ptr<int>> sv1{ptr};
+  ASSERT_NE(sv1.wlock()->get(), nullptr);
+  ASSERT_EQ(*sv1.wlock()->get(), 7);
+}
+
+TEST(synchronized_tests, ConstructorIsVariadic) {
+  sv::synchronized<std::pair<int, std::string>> sv1{11, "example string literal"};
+  ASSERT_EQ(sv1.wlock()->first, 11);
+  ASSERT_EQ(sv1.wlock()->second, "example string literal");
+}
+
+TEST(synchronized_tests, BasicAssertions) {
   sv::synchronized<std::map<int, int>> sv0;
   sv0.wlock()->emplace(0, 5);
   {
