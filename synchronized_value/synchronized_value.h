@@ -2,10 +2,18 @@
 
 #include <mutex>
 
-template <typename GuardedType, typename MutexType = std::mutex>
+namespace sv {
+
+template <typename L>
+concept basic_lockable = requires(L m) {
+  m.lock();
+  m.unlock();
+};
+
+template <typename GuardedType, basic_lockable MutexType = std::mutex>
 class synchronized_value;
 
-template <typename GuardedType, typename MutexType = std::mutex>
+template <typename GuardedType, basic_lockable MutexType = std::mutex>
 class update_guard {
   std::unique_lock<MutexType> lock_;
   GuardedType *guarded_data_;
@@ -22,7 +30,8 @@ public:
   auto operator*() noexcept -> GuardedType & { return *guarded_data_; }
 };
 
-template <typename GuardedType, typename MutexType> class synchronized_value {
+template <typename GuardedType, basic_lockable MutexType>
+class synchronized_value {
   friend class update_guard<GuardedType, MutexType>;
 
   MutexType mutex_;
@@ -69,3 +78,4 @@ public:
     return value_locker{mutex_, guarded_data_};
   }
 };
+} // namespace sv

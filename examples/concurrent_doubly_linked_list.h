@@ -48,9 +48,9 @@ public:
 private:
   // INVARIANT: !!head_ == !!tail_
   // INVARIANT: !head_ || !head_->prev
-  mutable synchronized_value<std::unique_ptr<node_t>, std::recursive_mutex>
+  mutable sv::synchronized_value<std::unique_ptr<node_t>, std::recursive_mutex>
       head_;
-  mutable synchronized_value<node_t *, std::recursive_mutex> tail_;
+  mutable sv::synchronized_value<node_t *, std::recursive_mutex> tail_;
 
   auto insert_empty(auto &headGuard, Element const &value) -> iterator {
     *headGuard = std::make_unique<node_t>(value);
@@ -60,16 +60,16 @@ private:
   }
 
   auto insert_head(Element const &value) -> iterator {
-    update_guard headGuard{head_};
+    sv::update_guard headGuard{head_};
     *headGuard = std::make_unique<node_t>(value, std::move(*headGuard));
     (*headGuard)->next->prev = headGuard->get();
     return iterator{headGuard->get()};
   }
 
   auto insert_tail(Element const &value) -> iterator {
-    if (update_guard headGuard{head_}; !*headGuard)
+    if (sv::update_guard headGuard{head_}; !*headGuard)
       return insert_empty(headGuard, value);
-    update_guard tailGuard{tail_};
+    sv::update_guard tailGuard{tail_};
     (*tailGuard)->next = std::make_unique<node_t>(value, nullptr, *tailGuard);
     *tailGuard = (*tailGuard)->next.get();
     return iterator{*tailGuard};
@@ -113,9 +113,9 @@ public:
   [[nodiscard]] auto end() const -> iterator { return iterator{nullptr}; }
 
   [[nodiscard]] auto check_invariants() const -> bool {
-    update_guard<std::unique_ptr<node_t>, std::recursive_mutex> headGuard{
+    sv::update_guard<std::unique_ptr<node_t>, std::recursive_mutex> headGuard{
         head_};
-    update_guard<node_t *, std::recursive_mutex> tailGuard{tail_};
+    sv::update_guard<node_t *, std::recursive_mutex> tailGuard{tail_};
     return !!*headGuard == !!*tailGuard &&
            (!*headGuard || !(*headGuard)->prev) &&
            // NOTE(jrgfogh): This will deadlock!
@@ -158,10 +158,10 @@ public:
   }
 
   auto erase(iterator where) -> iterator {
-    if (update_guard headGuard{head_}; headGuard->get() == where.node_)
+    if (sv::update_guard headGuard{head_}; headGuard->get() == where.node_)
       return erase_head(headGuard);
     node_t *prev = where.node_->prev;
-    if (update_guard tailGuard{tail_}; where.node_ == *tailGuard)
+    if (sv::update_guard tailGuard{tail_}; where.node_ == *tailGuard)
       *tailGuard = prev;
     prev->next = std::move(prev->next->next);
     if (prev->next)

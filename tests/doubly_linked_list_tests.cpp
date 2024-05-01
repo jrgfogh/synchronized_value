@@ -4,11 +4,8 @@
 #include "gtest_unwarn.h"
 
 #include <algorithm>
-#include <execution>
 #include <future>
 #include <random>
-
-#include "../synchronized_value/synchronized_value.h"
 
 template <typename DoublyLinkedList>
 class doubly_linked_list_tests : public ::testing::Test {};
@@ -111,10 +108,10 @@ TEST(doubly_linked_list_tests, async) {
   std::ranges::shuffle(iterators, mt);
   std::vector<std::future<void>> futures;
   futures.reserve(iterators.size());
-  synchronized_value<example::doubly_linked_list<int>> sync_l{std::move(l)};
+  sv::synchronized_value<example::doubly_linked_list<int>> sync_l{std::move(l)};
   for (auto const it : iterators) {
     futures.emplace_back(std::async([&sync_l, it] {
-      update_guard guard{sync_l};
+      sv::update_guard guard{sync_l};
       guard->erase(it);
       EXPECT_TRUE(guard->check_invariants());
     }));
