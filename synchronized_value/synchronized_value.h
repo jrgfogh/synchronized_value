@@ -2,14 +2,19 @@
 
 #include <mutex>
 
-template <typename GuardedType> class synchronized_value;
+template <typename GuardedType, typename MutexType = std::mutex>
+class synchronized_value;
 
-template <typename GuardedType> class update_guard {
-  std::unique_lock<std::mutex> lock_;
+template <typename GuardedType, typename MutexType = std::mutex>
+class update_guard {
+  std::unique_lock<MutexType> lock_;
   GuardedType *guarded_data_;
 
 public:
-  explicit update_guard(synchronized_value<GuardedType> &sv)
+  using value_type = GuardedType;
+  using mutex_type = MutexType;
+
+  explicit update_guard(synchronized_value<GuardedType, MutexType> &sv)
       : lock_{sv.mutex_}, guarded_data_{&sv.guarded_data_} {}
 
   auto operator->() noexcept -> GuardedType * { return guarded_data_; }
@@ -17,15 +22,15 @@ public:
   auto operator*() noexcept -> GuardedType & { return *guarded_data_; }
 };
 
-template <typename GuardedType> class synchronized_value {
-  friend class update_guard<GuardedType>;
+template <typename GuardedType, typename MutexType> class synchronized_value {
+  friend class update_guard<GuardedType, MutexType>;
 
-  std::mutex mutex_;
+  MutexType mutex_;
   GuardedType guarded_data_;
 
 public:
-
   using value_type = GuardedType;
+  using mutex_type = MutexType;
 
   synchronized_value(synchronized_value const &) = delete;
   auto operator=(synchronized_value const &) -> synchronized_value & = delete;
@@ -43,11 +48,11 @@ public:
 
   auto operator*() {
     class value_locker {
-      std::unique_lock<std::mutex> lock_;
+      std::unique_lock<MutexType> lock_;
       GuardedType &guarded_data_;
 
     public:
-      explicit value_locker(std::mutex &mutex, GuardedType &data)
+      explicit value_locker(MutexType &mutex, GuardedType &data)
           : lock_{mutex}, guarded_data_{data} {}
 
       explicit(false) operator GuardedType &() { return guarded_data_; }

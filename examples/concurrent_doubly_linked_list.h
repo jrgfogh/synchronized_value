@@ -1,7 +1,6 @@
-/// TODO(jrgfogh): This file doesn't actually contain any synchronization yet.
-
 #pragma once
 
+#include "../synchronized_value/synchronized_value.h"
 #include <map>
 #include <memory>
 #include <sstream>
@@ -49,38 +48,42 @@ public:
 private:
   // INVARIANT: !!head_ == !!tail_
   // INVARIANT: !head_ || !head_->prev
-  std::unique_ptr<node_t> head_;
-  node_t *tail_ = nullptr;
+  mutable synchronized_value<std::unique_ptr<node_t>, std::recursive_mutex>
+      head_;
+  mutable synchronized_value<node_t *, std::recursive_mutex> tail_;
 
-  auto insert_empty(Element const &value) -> iterator {
-    head_ = std::make_unique<node_t>(value);
-    tail_ = head_.get();
-    return iterator{head_.get()};
+  auto insert_empty(auto &headGuard, Element const &value) -> iterator {
+    *headGuard = std::make_unique<node_t>(value);
+    *tail_ = headGuard->get();
+    // TODO(jrgfogh): We're leaking an unguarded reference here:
+    return iterator{headGuard->get()};
   }
 
   auto insert_head(Element const &value) -> iterator {
-    head_ = std::make_unique<node_t>(value, std::move(head_));
-    head_->next->prev = head_.get();
-    return iterator{head_.get()};
+    update_guard headGuard{head_};
+    *headGuard = std::make_unique<node_t>(value, std::move(*headGuard));
+    (*headGuard)->next->prev = headGuard->get();
+    return iterator{headGuard->get()};
   }
 
   auto insert_tail(Element const &value) -> iterator {
-    if (!head_)
-      return insert_empty(value);
-    tail_->next = std::make_unique<node_t>(value, nullptr, tail_);
-    tail_ = tail_->next.get();
-    return iterator{tail_};
+    if (update_guard headGuard{head_}; !*headGuard)
+      return insert_empty(headGuard, value);
+    update_guard tailGuard{tail_};
+    (*tailGuard)->next = std::make_unique<node_t>(value, nullptr, *tailGuard);
+    *tailGuard = (*tailGuard)->next.get();
+    return iterator{*tailGuard};
   }
 
-  auto erase_head() -> iterator {
-    head_ = std::move(head_->next);
-    if (head_)
-      head_->prev = nullptr;
+  auto erase_head(auto &headGuard) -> iterator {
+    *headGuard = std::move((*headGuard)->next);
+    if (*headGuard)
+      (*headGuard)->prev = nullptr;
     else
       // This isn't strictly needed, since we never read tail_ in
       // insert_empty(). I assign it anyway, to maintain the invariant.
-      tail_ = nullptr;
-    return iterator{head_.get()};
+      *tail_ = nullptr;
+    return iterator{headGuard->get()};
   }
 
   [[nodiscard]] auto check_node_invariants() const -> bool {
@@ -103,12 +106,19 @@ public:
     return iterator{prev_next.get()};
   }
 
-  [[nodiscard]] auto begin() const -> iterator { return iterator{head_.get()}; }
+  [[nodiscard]] auto begin() const -> iterator {
+    return iterator{head_->get()};
+  }
 
   [[nodiscard]] auto end() const -> iterator { return iterator{nullptr}; }
 
   [[nodiscard]] auto check_invariants() const -> bool {
-    return !!head_ == !!tail_ && (!head_ || !head_->prev) &&
+    update_guard<std::unique_ptr<node_t>, std::recursive_mutex> headGuard{
+        head_};
+    update_guard<node_t *, std::recursive_mutex> tailGuard{tail_};
+    return !!*headGuard == !!*tailGuard &&
+           (!*headGuard || !(*headGuard)->prev) &&
+           // NOTE(jrgfogh): This will deadlock!
            check_node_invariants();
   }
 
@@ -148,11 +158,11 @@ public:
   }
 
   auto erase(iterator where) -> iterator {
-    if (head_.get() == where.node_)
-      return erase_head();
+    if (update_guard headGuard{head_}; headGuard->get() == where.node_)
+      return erase_head(headGuard);
     node_t *prev = where.node_->prev;
-    if (where.node_ == tail_)
-      tail_ = prev;
+    if (update_guard tailGuard{tail_}; where.node_ == *tailGuard)
+      *tailGuard = prev;
     prev->next = std::move(prev->next->next);
     if (prev->next)
       prev->next->prev = prev;
