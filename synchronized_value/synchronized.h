@@ -30,8 +30,7 @@ public:
   auto operator*() noexcept -> GuardedType & { return *guarded_data_; }
 };
 
-template <typename GuardedType, basic_lockable MutexType>
-class synchronized {
+template <typename GuardedType, basic_lockable MutexType> class synchronized {
   friend class update_guard<GuardedType, MutexType>;
 
   MutexType mutex_;
@@ -53,29 +52,6 @@ public:
     return func(guarded_data_);
   }
 
-  auto operator->() { return update_guard{*this}; }
-
-  auto operator*() {
-    class value_locker {
-      std::unique_lock<MutexType> lock_;
-      GuardedType &guarded_data_;
-
-    public:
-      explicit value_locker(MutexType &mutex, GuardedType &data)
-          : lock_{mutex}, guarded_data_{data} {}
-
-      explicit(false) operator GuardedType &() { return guarded_data_; }
-
-      explicit(false) operator GuardedType const &() const {
-        return guarded_data_;
-      }
-
-      auto operator=(GuardedType const &new_data) -> value_locker & {
-        guarded_data_ = new_data;
-        return *this;
-      }
-    };
-    return value_locker{mutex_, guarded_data_};
-  }
+  auto wlock() { return sv::update_guard{*this}; }
 };
 } // namespace sv

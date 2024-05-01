@@ -27,16 +27,9 @@ static_assert(valid_specialization<int, std::mutex>);
 static_assert(valid_specialization<int, std::shared_mutex>);
 static_assert(valid_specialization<double, std::recursive_mutex>);
 
-TEST(synchronized_value_tests, star_operator) {
-  sv::synchronized<int> sv{5};
-  EXPECT_EQ(*sv, 5);
-  *sv = 2;
-  EXPECT_EQ(*sv, 2);
-}
-
 TEST(synchronized_value_tests, BasicAssertions) {
   sv::synchronized<std::map<int, int>> sv0;
-  sv0->emplace(0, 5);
+  sv0.wlock()->emplace(0, 5);
   {
     sv::update_guard guard{sv0};
     ++(*guard)[0];

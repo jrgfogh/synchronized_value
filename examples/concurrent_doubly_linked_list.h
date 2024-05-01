@@ -54,7 +54,7 @@ private:
 
   auto insert_empty(auto &headGuard, Element const &value) -> iterator {
     *headGuard = std::make_unique<node_t>(value);
-    *tail_ = headGuard->get();
+    *tail_.wlock() = headGuard->get();
     // TODO(jrgfogh): We're leaking an unguarded reference here:
     return iterator{headGuard->get()};
   }
@@ -82,7 +82,7 @@ private:
     else
       // This isn't strictly needed, since we never read tail_ in
       // insert_empty(). I assign it anyway, to maintain the invariant.
-      *tail_ = nullptr;
+      *tail_.wlock() = nullptr;
     return iterator{headGuard->get()};
   }
 
@@ -107,15 +107,14 @@ public:
   }
 
   [[nodiscard]] auto begin() const -> iterator {
-    return iterator{head_->get()};
+    return iterator{head_.wlock()->get()};
   }
 
   [[nodiscard]] auto end() const -> iterator { return iterator{nullptr}; }
 
   [[nodiscard]] auto check_invariants() const -> bool {
-    sv::update_guard<std::unique_ptr<node_t>, std::recursive_mutex> headGuard{
-        head_};
-    sv::update_guard<node_t *, std::recursive_mutex> tailGuard{tail_};
+    sv::update_guard headGuard = head_.wlock();
+    sv::update_guard tailGuard = tail_.wlock();
     return !!*headGuard == !!*tailGuard &&
            (!*headGuard || !(*headGuard)->prev) &&
            // NOTE(jrgfogh): This will deadlock!
