@@ -2,14 +2,15 @@
 
 #include <mutex>
 
-template <typename GuardedType, typename MutexType=std::mutex> class synchronized_value;
+template <typename GuardedType, typename MutexType = std::mutex>
+class synchronized_value;
 
-template <typename GuardedType, typename MutexType=std::mutex> class update_guard {
+template <typename GuardedType, typename MutexType = std::mutex>
+class update_guard {
   std::unique_lock<MutexType> lock_;
   GuardedType *guarded_data_;
 
 public:
-
   using value_type = GuardedType;
   using mutex_type = MutexType;
 
@@ -28,7 +29,6 @@ template <typename GuardedType, typename MutexType> class synchronized_value {
   GuardedType guarded_data_;
 
 public:
-
   using value_type = GuardedType;
   using mutex_type = MutexType;
 

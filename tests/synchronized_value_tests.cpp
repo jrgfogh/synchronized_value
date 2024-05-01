@@ -5,7 +5,7 @@
 static_assert(std::is_nothrow_move_assignable_v<update_guard<int>>);
 static_assert(std::is_nothrow_move_constructible_v<update_guard<int>>);
 static_assert(std::is_nothrow_swappable_v<update_guard<int>>);
-static_assert(std::is_same_v<synchronized_value<int>::value_type,int>);
+static_assert(std::is_same_v<synchronized_value<int>::value_type, int>);
 
 TEST(synchronized_value_tests, star_operator) {
   synchronized_value<int> sv{5};
