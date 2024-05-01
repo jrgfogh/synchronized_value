@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../synchronized_value/synchronized_value.h"
+#include "../synchronized_value/synchronized.h"
 #include <map>
 #include <memory>
 #include <sstream>
@@ -48,9 +48,9 @@ public:
 private:
   // INVARIANT: !!head_ == !!tail_
   // INVARIANT: !head_ || !head_->prev
-  mutable sv::synchronized_value<std::unique_ptr<node_t>, std::recursive_mutex>
+  mutable sv::synchronized<std::unique_ptr<node_t>, std::recursive_mutex>
       head_;
-  mutable sv::synchronized_value<node_t *, std::recursive_mutex> tail_;
+  mutable sv::synchronized<node_t *, std::recursive_mutex> tail_;
 
   auto insert_empty(auto &headGuard, Element const &value) -> iterator {
     *headGuard = std::make_unique<node_t>(value);

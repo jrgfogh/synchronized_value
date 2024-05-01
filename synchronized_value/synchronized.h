@@ -11,7 +11,7 @@ concept basic_lockable = requires(L m) {
 };
 
 template <typename GuardedType, basic_lockable MutexType = std::mutex>
-class synchronized_value;
+class synchronized;
 
 template <typename GuardedType, basic_lockable MutexType = std::mutex>
 class update_guard {
@@ -22,7 +22,7 @@ public:
   using value_type = GuardedType;
   using mutex_type = MutexType;
 
-  explicit update_guard(synchronized_value<GuardedType, MutexType> &sv)
+  explicit update_guard(synchronized<GuardedType, MutexType> &sv)
       : lock_{sv.mutex_}, guarded_data_{&sv.guarded_data_} {}
 
   auto operator->() noexcept -> GuardedType * { return guarded_data_; }
@@ -31,7 +31,7 @@ public:
 };
 
 template <typename GuardedType, basic_lockable MutexType>
-class synchronized_value {
+class synchronized {
   friend class update_guard<GuardedType, MutexType>;
 
   MutexType mutex_;
@@ -41,11 +41,11 @@ public:
   using value_type = GuardedType;
   using mutex_type = MutexType;
 
-  synchronized_value(synchronized_value const &) = delete;
-  auto operator=(synchronized_value const &) -> synchronized_value & = delete;
+  synchronized(synchronized const &) = delete;
+  auto operator=(synchronized const &) -> synchronized & = delete;
 
   template <typename... Args>
-  explicit synchronized_value(Args &&...args)
+  explicit synchronized(Args &&...args)
       : guarded_data_{std::forward<Args>(args)...} {}
 
   template <typename F> auto apply(F const &func) {

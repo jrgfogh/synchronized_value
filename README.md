@@ -1,6 +1,6 @@
-# synchronized_value
+# synchronized
 
-`synchronized_value` is a utility class meant to almost completely replace manual usage of mutexes and condition variables in C++,
+`synchronized` is a utility class meant to almost completely replace manual usage of mutexes and condition variables in C++,
 in the same way that smart pointers replace owning raw pointers.
 
 The project originally grew out of a [lightning talk](https://www.youtube.com/watch?v=F0jaGcCUpOo) at CppCon 2023 about
@@ -15,7 +15,7 @@ projects, I have decided to redesign the abstraction.
 
 ## Ideas for Extensions
 
-* Const should propagate, so `synchronized_value<T> const` is equivalent to `synchronized_value<T const>`.
+* Const should propagate, so `synchronized<T> const` is equivalent to `synchronized<T const>`.
 * Timed mutex types.
 * Sharing a mutex between several update guards, analogously to how several `std::shared_ptr`s can share a count.
   Use case: Locking head/tail in the `concurrent_doubly_linked_list` example. 
