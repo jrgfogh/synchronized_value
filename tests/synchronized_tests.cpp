@@ -48,18 +48,13 @@ TEST(synchronized_tests, ConstructorForwardsCopyOnlyType) {
 
 TEST(synchronized_tests, ConstructorIsVariadic) {
   sv::synchronized<std::pair<int, std::string>> const sv1{11, "example string literal"};
-  ASSERT_EQ(sv1.rlock()->first, 11);
-  ASSERT_EQ(sv1.rlock()->second, "example string literal");
+  EXPECT_EQ(sv1.rlock()->first, 11);
+  EXPECT_EQ(sv1.rlock()->second, "example string literal");
 }
 
-TEST(synchronized_tests, BasicAssertions) {
-  sv::synchronized<std::map<int, int>> sv0;
-  sv0.wlock()->emplace(0, 5);
-  {
-    sv::update_guard guard{sv0};
-    ++(*guard)[0];
-    auto var = guard->at(0);
-  }
-  sv::synchronized<std::tuple<int, int, int>> sv1{1, 33, 7};
-  sv1.apply([](auto tuple) { auto [a, b, c] = tuple; });
+TEST(synchronized_tests, ExclusiveLockAllowsWriting) {
+  sv::synchronized<int> sv0{5};
+  EXPECT_EQ(*sv0.rlock(), 5);
+  *sv0.wlock() = 7;
+  EXPECT_EQ(*sv0.rlock(), 7);
 }
