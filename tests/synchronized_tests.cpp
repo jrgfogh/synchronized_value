@@ -5,24 +5,29 @@
 
 #include "gtest_unwarn.h"
 
-template <typename ValueType, typename MutexType>
+template <typename Synchronized>
+concept rlock_uses_const =
+    std::is_const_v<typename decltype(std::declval<Synchronized>().rlock())::value_type>;
+
+template <typename Value, typename Mutex>
 concept valid_specialization =
-    std::is_nothrow_move_assignable_v<sv::update_guard<ValueType, MutexType>> &&
+    std::is_nothrow_move_assignable_v<sv::update_guard<Value, Mutex>> &&
     std::is_nothrow_move_constructible_v<
-        sv::update_guard<ValueType, MutexType>> &&
-    std::is_nothrow_swappable_v<sv::update_guard<ValueType, MutexType>> &&
+        sv::update_guard<Value, Mutex>> &&
+    std::is_nothrow_swappable_v<sv::update_guard<Value, Mutex>> &&
     !std::is_copy_constructible_v<
-        sv::synchronized<ValueType, MutexType>> &&
-    std::is_same_v<typename sv::update_guard<ValueType, MutexType>::value_type,
-                   ValueType> &&
-    std::is_same_v<typename sv::update_guard<ValueType, MutexType>::mutex_type,
-                   MutexType> &&
+        sv::synchronized<Value, Mutex>> &&
+    std::is_same_v<typename sv::update_guard<Value, Mutex>::value_type,
+                   Value> &&
+    std::is_same_v<typename sv::update_guard<Value, Mutex>::mutex_type,
+                   Mutex> &&
     std::is_same_v<
-        typename sv::synchronized<ValueType, MutexType>::value_type,
-        ValueType> &&
+        typename sv::synchronized<Value, Mutex>::value_type,
+                   Value> &&
     std::is_same_v<
-        typename sv::synchronized<ValueType, MutexType>::mutex_type,
-        MutexType>;
+        typename sv::synchronized<Value, Mutex>::mutex_type,
+                   Mutex> &&
+    rlock_uses_const<sv::synchronized<Value, Mutex>>;
 
 static_assert(valid_specialization<int, std::mutex>);
 static_assert(valid_specialization<int, std::shared_mutex>);
