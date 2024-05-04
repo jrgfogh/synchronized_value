@@ -1,11 +1,35 @@
-# synchronized_value
+# synchronized
 
-`synchronized_value` is a utility class meant to almost completely replace manual usage of mutexes and condition variables in C++,
+`synchronized` is a utility class meant to almost completely replace manual usage of mutexes and condition variables in C++,
 in the same way that smart pointers replace owning raw pointers.
 
 The project originally grew out of a [lightning talk](https://www.youtube.com/watch?v=F0jaGcCUpOo) at CppCon 2023 about
 a version of `synchronized_value`, which has been proposed for the C++ standard. Based on the feedback and inspiration from similar
 projects, I have decided to redesign the abstraction.
+
+## Usage
+
+A simple but complete example can be found in `examples/synchronized_stack.h`:
+
+```c++
+class synchronized_stack {
+  sv::synchronized<std::stack<int>> data_;
+
+public:
+  using value_type = Element;
+
+  void push(int d) { data_.wlock()->push(d); }
+  std::optional<int> pop() {
+    auto lock = data_.wlock();
+    if (lock->empty()) return {};
+    auto result = lock->top();
+    lock->pop();
+    return result;
+  }
+  auto empty() { return data_.rlock()->empty(); }
+  auto size() { return data_.rlock()->size(); }
+};
+```
 
 ## Design Goals
 
@@ -15,7 +39,7 @@ projects, I have decided to redesign the abstraction.
 
 ## Ideas for Extensions
 
-* Const should propagate, so `synchronized_value<T> const` is equivalent to `synchronized_value<T const>`.
+* Const should propagate, so `synchronized<T> const` is equivalent to `synchronized<T const>`.
 * Timed mutex types.
 * Sharing a mutex between several update guards, analogously to how several `std::shared_ptr`s can share a count.
   Use case: Locking head/tail in the `concurrent_doubly_linked_list` example. 
@@ -34,8 +58,9 @@ Ansel Sermersheim talked about a similar construct with some extra features at C
 
 [CppCon 2017: Ansel Sermersheim “Multithreading is the answer. What is the question? (part 2 of 2)”](https://www.youtube.com/watch?v=sDLQWivf1-I)
 
-[Boost's synchronized_value](https://www.boost.org/doc/libs/1_83_0/doc/html/thread/sds.html#thread.sds.synchronized_valuesxxx)
+[`Synchronized<T>` from folly](https://github.com/facebook/folly/blob/main/folly/docs/Synchronized.md): Very well-designed abstraction. Inspired `synchronized`'s interface.
 
-[`Synchronized<T>` from folly](https://github.com/facebook/folly/blob/main/folly/docs/Synchronized.md)
+[Boost's synchronized_value](https://www.boost.org/doc/libs/1_83_0/doc/html/thread/sds.html#thread.sds.synchronized_valuesxxx):
+Essentially the same interface as the one proposed for the standard, with a few features added.
 
 The current standard proposal is described in documents number [N4033](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n4033.html) and [p0290r4](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2023/p0290r4.html).

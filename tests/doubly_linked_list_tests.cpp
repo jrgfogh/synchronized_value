@@ -108,7 +108,7 @@ TEST(doubly_linked_list_tests, async) {
   std::ranges::shuffle(iterators, mt);
   std::vector<std::future<void>> futures;
   futures.reserve(iterators.size());
-  sv::synchronized_value<example::doubly_linked_list<int>> sync_l{std::move(l)};
+  sv::synchronized<example::doubly_linked_list<int>> sync_l{std::move(l)};
   for (auto const it : iterators) {
     futures.emplace_back(std::async([&sync_l, it] {
       sv::update_guard guard{sync_l};
