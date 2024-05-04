@@ -33,15 +33,15 @@ public:
   auto operator*() noexcept -> GuardedType & { return *guarded_data_; }
 };
 
-template <typename GuardedType, basic_lockable MutexType> class synchronized {
-  friend class update_guard<GuardedType, MutexType>;
-  friend class update_guard<GuardedType const, MutexType>;
+template <typename GuardedData, basic_lockable MutexType> class synchronized {
+  friend class update_guard<GuardedData, MutexType>;
+  friend class update_guard<GuardedData const, MutexType>;
 
   mutable MutexType mutex_;
-  GuardedType guarded_data_;
+  GuardedData guarded_data_;
 
 public:
-  using value_type = GuardedType;
+  using value_type = GuardedData;
   using mutex_type = MutexType;
 
   synchronized(synchronized const &) = delete;
@@ -58,6 +58,6 @@ public:
 
   auto wlock() { return update_guard{*this}; }
 
-  auto rlock() const { return update_guard<GuardedType const, MutexType>{*this}; }
+  auto rlock() const { return update_guard<GuardedData const, MutexType>{*this}; }
 };
 } // namespace sv

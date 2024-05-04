@@ -1,31 +1,29 @@
 #include "../synchronized_value/synchronized.h"
 
+#include <optional>
 #include <shared_mutex>
+#include <stack>
 #include <string>
 
 #include "gtest_unwarn.h"
 
 template <typename Synchronized>
-concept rlock_uses_const =
-    std::is_const_v<typename decltype(std::declval<Synchronized>().rlock())::value_type>;
+concept rlock_uses_const = std::is_const_v<
+    typename decltype(std::declval<Synchronized>().rlock())::value_type>;
 
 template <typename Value, typename Mutex>
 concept valid_specialization =
     std::is_nothrow_move_assignable_v<sv::update_guard<Value, Mutex>> &&
-    std::is_nothrow_move_constructible_v<
-        sv::update_guard<Value, Mutex>> &&
+    std::is_nothrow_move_constructible_v<sv::update_guard<Value, Mutex>> &&
     std::is_nothrow_swappable_v<sv::update_guard<Value, Mutex>> &&
-    !std::is_copy_constructible_v<
-        sv::synchronized<Value, Mutex>> &&
+    !std::is_copy_constructible_v<sv::synchronized<Value, Mutex>> &&
     std::is_same_v<typename sv::update_guard<Value, Mutex>::value_type,
                    Value> &&
     std::is_same_v<typename sv::update_guard<Value, Mutex>::mutex_type,
                    Mutex> &&
-    std::is_same_v<
-        typename sv::synchronized<Value, Mutex>::value_type,
+    std::is_same_v<typename sv::synchronized<Value, Mutex>::value_type,
                    Value> &&
-    std::is_same_v<
-        typename sv::synchronized<Value, Mutex>::mutex_type,
+    std::is_same_v<typename sv::synchronized<Value, Mutex>::mutex_type,
                    Mutex> &&
     rlock_uses_const<sv::synchronized<Value, Mutex>>;
 
@@ -47,7 +45,8 @@ TEST(synchronized_tests, ConstructorForwardsCopyOnlyType) {
 }
 
 TEST(synchronized_tests, ConstructorIsVariadic) {
-  sv::synchronized<std::pair<int, std::string>> const sv1{11, "example string literal"};
+  sv::synchronized<std::pair<int, std::string>> const sv1{
+      11, "example string literal"};
   EXPECT_EQ(sv1.rlock()->first, 11);
   EXPECT_EQ(sv1.rlock()->second, "example string literal");
 }
