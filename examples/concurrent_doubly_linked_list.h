@@ -48,8 +48,7 @@ public:
 private:
   // INVARIANT: !!head_ == !!tail_
   // INVARIANT: !head_ || !head_->prev
-  mutable sv::synchronized<std::unique_ptr<node_t>, std::recursive_mutex>
-      head_;
+  mutable sv::synchronized<std::unique_ptr<node_t>, std::recursive_mutex> head_;
   mutable sv::synchronized<node_t *, std::recursive_mutex> tail_;
 
   auto insert_empty(auto &headGuard, Element const &value) -> iterator {

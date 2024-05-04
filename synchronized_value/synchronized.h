@@ -25,7 +25,8 @@ public:
   explicit update_guard(synchronized<GuardedType, MutexType> &sv)
       : lock_{sv.mutex_}, guarded_data_{&sv.guarded_data_} {}
 
-  explicit update_guard(const synchronized<std::remove_const_t<GuardedType>, MutexType> &sv)
+  explicit update_guard(
+      const synchronized<std::remove_const_t<GuardedType>, MutexType> &sv)
       : lock_{sv.mutex_}, guarded_data_{&sv.guarded_data_} {}
 
   auto operator->() noexcept -> GuardedType * { return guarded_data_; }
@@ -58,6 +59,8 @@ public:
 
   auto wlock() { return update_guard{*this}; }
 
-  auto rlock() const { return update_guard<GuardedData const, MutexType>{*this}; }
+  auto rlock() const {
+    return update_guard<GuardedData const, MutexType>{*this};
+  }
 };
 } // namespace sv

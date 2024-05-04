@@ -2,8 +2,11 @@
 
 #include "gtest_unwarn.h"
 
-static_assert(std::is_same_v<typename example::synchronized_stack<int>::value_type, int>);
-static_assert(std::is_same_v<typename example::synchronized_stack<double>::value_type, double>);
+static_assert(
+    std::is_same_v<typename example::synchronized_stack<int>::value_type, int>);
+static_assert(
+    std::is_same_v<typename example::synchronized_stack<double>::value_type,
+                   double>);
 
 TEST(synchronized_stack_tests, BasicUsage) {
   example::synchronized_stack<int> ss;
