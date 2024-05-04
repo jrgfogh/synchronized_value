@@ -52,11 +52,9 @@ public:
 
 ## Related Work:
 
-Ansel Sermersheim talked about a similar construct with some extra features at CppCon 2017. The relevant bits are in part 2.
+[CsLibGuarded](https://github.com/copperspice/cs_libguarded): "... a standalone header only library for multithreaded programming."
 
-[CppCon 2017: Ansel Sermersheim “Multithreading is the answer. What is the question? (part 1 of 2)”](https://www.youtube.com/watch?v=GNw3RXr-VJk)
-
-[CppCon 2017: Ansel Sermersheim “Multithreading is the answer. What is the question? (part 2 of 2)”](https://www.youtube.com/watch?v=sDLQWivf1-I)
+A very mature library, which is part of [CopperSpice](https://www.copperspice.com/).
 
 [`Synchronized<T>` from folly](https://github.com/facebook/folly/blob/main/folly/docs/Synchronized.md): Very well-designed abstraction. Inspired `synchronized`'s interface.
 
