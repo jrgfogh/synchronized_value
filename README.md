@@ -58,6 +58,10 @@ A very mature library, which is part of [CopperSpice](https://www.copperspice.co
 
 [`Synchronized<T>` from folly](https://github.com/facebook/folly/blob/main/folly/docs/Synchronized.md): Very well-designed abstraction. Inspired `synchronized`'s interface.
 
+[data_mutex](https://www.pera-software.com/html/blog/compile-time-guaranteed-thread-synchronization/compile-time-guaranteed-thread-synchronization-in-cpp.html) by [Peter Most](https://github.com/petermost): 
+Very similar to the `synchronized_value` proposed for the C++ standard, but with different names for the classes.
+Includes support for const access. Part of [CppAidKit](https://github.com/petermost/CppAidKit)
+
 [Boost's synchronized_value](https://www.boost.org/doc/libs/1_83_0/doc/html/thread/sds.html#thread.sds.synchronized_valuesxxx):
 Essentially the same interface as the one proposed for the standard, with a few features added.
 
